@@ -70,6 +70,7 @@ int getOptimalRefreshRate();
 #include "network/tls_psram.h"
 #include "notify/notify.h"
 #include "viz/visualizer.h"
+#include "ticker/ticker.h"
 #include "weather/weather.h"
 #include "web/web.h"
 
@@ -142,7 +143,8 @@ int getOptimalRefreshRate() {
         settings.clockStyle == 6 || settings.clockStyle == 7 ||
         settings.clockStyle == 8 || settings.clockStyle == 9 ||
         settings.clockStyle == 10 || settings.clockStyle == 11 ||
-        settings.clockStyle == 12 || settings.clockStyle == 14 || settings.clockStyle == 15 || settings.clockStyle == 16) {
+        settings.clockStyle == 12 || settings.clockStyle == 14 || settings.clockStyle == 15 || settings.clockStyle == 16 ||
+        settings.clockStyle == 18) {
       // Animated clocks (Mario, Space Invaders, Space Ship, Pong, Pac-Man, Snake, Tetris, Cycle, Asteroids, Dino, Matrix, Weather)
       rate = 20; // 20 Hz keeps character movement smooth
     } else {
@@ -205,6 +207,7 @@ void cycleClockScreens() {
     case 15: displayClockWithBomberman(); break;
     case 16: displayClockWithTron(); break;
     case 17: displayClockWithDoom(); break;
+    case 18: displayClockWithTicker(); break;
   }
 }
 
@@ -317,6 +320,9 @@ void loop() {
 
   // Background weather fetch: starts a one-shot task when one is due
   weatherLoop();
+
+  // Background stock-ticker fetch (same one-shot task pattern)
+  tickerLoop();
 
   // Crash report: note when this boot started, once the time is synced
   crashReportLoop();
@@ -470,6 +476,9 @@ void loop() {
         break;
       case 14:
         displayClockWithWeather();
+        break;
+      case 18:
+        displayClockWithTicker();
         break;
       default:
         displayStandardClock();
