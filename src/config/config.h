@@ -85,6 +85,7 @@ struct Settings {
   uint8_t timezoneIndex;    // Index into timezone database (for UI display)
   bool use24Hour;           // 24-hour format
   uint8_t dateFormat;       // 0=DD/MM/YYYY, 1=MM/DD/YYYY, 2=YYYY-MM-DD, 3=DD.MM.YYYY
+  bool showWeekday;         // Prefix the date with Mon/Tue/...
   uint8_t clockPosition;    // 0=Center, 1=Left, 2=Right
   int8_t clockOffset;       // Fine-tune clock position (-10 to +10)
   bool showClock;           // Show clock in metrics mode

@@ -790,6 +790,7 @@ void handlePortalValues() {
   form["matrixRainDensity"] = settings.matrixRainDensity;
   form["doomWind"] = settings.doomWind;
   form["dateFormat"] = settings.dateFormat;
+  form["showWeekday"] = settings.showWeekday;
   form["colonBlinkMode"] = settings.colonBlinkMode;
   form["ambientStyle"] = settings.ambientStyle;
   form["notifyPosition"] = settings.notifyPosition;
@@ -1058,6 +1059,9 @@ void handleSave() {
  }
  if (server.hasArg("dateFormat")) {
  settings.dateFormat = server.arg("dateFormat").toInt();
+ }
+ if (server.hasArg("showWeekday")) {
+ settings.showWeekday = server.arg("showWeekday").toInt() == 1;
  }
 
  // Save clock position
@@ -1748,6 +1752,7 @@ void handleExportConfig() {
  json += "\"daylightSaving\":" + String(settings.daylightSaving ? "true" : "false") + ",";
  json += "\"use24Hour\":" + String(settings.use24Hour ? "true" : "false") + ",";
  json += "\"dateFormat\":" + String(settings.dateFormat) + ",";
+ json += "\"showWeekday\":" + String(settings.showWeekday ? "true" : "false") + ",";
  json += "\"clockPosition\":" + String(settings.clockPosition) + ",";
  json += "\"clockOffset\":" + String(settings.clockOffset) + ",";
  json += "\"showClock\":" + String(settings.showClock ? "true" : "false") + ",";
@@ -2002,6 +2007,7 @@ void handleImportConfig() {
  if (!doc["daylightSaving"].isNull()) settings.daylightSaving = doc["daylightSaving"];
  if (!doc["use24Hour"].isNull()) settings.use24Hour = doc["use24Hour"];
  if (!doc["dateFormat"].isNull()) settings.dateFormat = doc["dateFormat"];
+ if (!doc["showWeekday"].isNull()) settings.showWeekday = doc["showWeekday"];
  if (!doc["clockPosition"].isNull()) settings.clockPosition = doc["clockPosition"];
  if (!doc["clockOffset"].isNull()) settings.clockOffset = doc["clockOffset"];
  if (!doc["showClock"].isNull()) settings.showClock = doc["showClock"];
