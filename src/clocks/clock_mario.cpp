@@ -120,24 +120,12 @@ void displayClockWithMario() {
 
   // Date at top
   display.setTextSize(1);
-  char dateStr[12];
+  char dateStr[16];
+  int dateW = formatDateString(dateStr, sizeof(dateStr), timeinfo, settings.showWeekday);
 
-  switch (settings.dateFormat) {
-    case 0:
-      sprintf(dateStr, "%02d/%02d/%04d", timeinfo.tm_mday, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900);
-      break;
-    case 1:
-      sprintf(dateStr, "%02d/%02d/%04d", timeinfo.tm_mon + 1, timeinfo.tm_mday, timeinfo.tm_year + 1900);
-      break;
-    case 2:
-      sprintf(dateStr, "%04d-%02d-%02d", timeinfo.tm_year + 1900, timeinfo.tm_mon + 1, timeinfo.tm_mday);
-      break;
-    case 3:
-      sprintf(dateStr, "%02d.%02d.%04d", timeinfo.tm_mday, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900);
-      break;
-  }
-
-  int date_x = (SCREEN_WIDTH - DATE_DISPLAY_WIDTH) / 2;
+  int date_x = (SCREEN_WIDTH - dateW) / 2;
+  // The coin counter ("x00") ends at x=24; keep a wide date clear of it
+  if (settings.marioIdleEncounters && date_x < 25) date_x = 25;
   display.setCursor(date_x, 4);
   display.print(dateStr);
   drawMeridiemIndicator(110, 4, displayed_is_pm);
