@@ -27,6 +27,11 @@ bool shouldShowColon();
 void formatTimeForDisplay(int hour24, int minute, int& displayHour,
                           int& displayMin, bool& isPM);
 
+// Build the date string in the configured dateFormat, optionally prefixed
+// with the abbreviated weekday ("Mon 25/09/2026"). buf needs >= 16 bytes.
+// Returns the rendered width in pixels at text size 1 (6 px per char).
+int formatDateString(char* buf, size_t len, const struct tm& t, bool withWeekday);
+
 // Sync the shared rendered clock state from real time
 void syncDisplayedTime(const struct tm* timeinfo);
 

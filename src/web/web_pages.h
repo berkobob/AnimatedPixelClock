@@ -736,6 +736,15 @@ static const char PAGE_HTML[] PROGMEM = R"PAGE(<!doctype html>
                   </select>
                 </div>
               </div>
+              <div class="field" style="margin-bottom:0">
+                <label class="field-label" for="showWeekday">Weekday</label>
+                <div class="select-wrap">
+                  <select name="showWeekday" id="showWeekday">
+                    <option value="0">Hidden &middot; 25/09/2026</option>
+                    <option value="1">Shown &middot; Fri 25/09/2026</option>
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
           <div id="colorsClock"></div>

@@ -132,6 +132,7 @@ void loadSettings() {
     strcpy(settings.timezoneString, "CET-1CEST,M3.5.0/02:00,M10.5.0/03:00"); // Default: Central European
     settings.use24Hour = true;
     settings.dateFormat = 0;
+    settings.showWeekday = false;
     settings.clockPosition = 0; // Center by default
     settings.clockOffset = 0;   // No offset by default
     settings.showClock = true;
@@ -219,6 +220,7 @@ void loadSettings() {
     preferences.putString("tz", "CET-1CEST,M3.5.0/02:00,M10.5.0/03:00"); // Default: Central European
     preferences.putBool("use24Hour", true);
     preferences.putInt("dateFormat", 0);
+    preferences.putBool("showWeekday", false);
     preferences.putInt("clockPos", 0);    // Center
     preferences.putInt("clockOffset", 0); // No offset
     preferences.putBool("showClock", true);
@@ -336,6 +338,7 @@ void loadSettings() {
   settings.use24Hour = preferences.getBool("use24Hour", true); // Default: 24h
   settings.dateFormat =
       preferences.getInt("dateFormat", 0); // Default: DD/MM/YYYY
+  settings.showWeekday = preferences.getBool("showWeekday", false);
   settings.clockPosition = preferences.getInt("clockPos", 0); // Default: Center
   settings.clockOffset =
       preferences.getInt("clockOffset", 0); // Default: No offset
@@ -740,6 +743,7 @@ void saveSettings() {
   preferences.putUChar("tzIdx", settings.timezoneIndex); // Timezone region index
   preferences.putBool("use24Hour", settings.use24Hour);
   preferences.putInt("dateFormat", settings.dateFormat);
+  preferences.putBool("showWeekday", settings.showWeekday);
   preferences.putInt("clockPos", settings.clockPosition);
   preferences.putInt("clockOffset", settings.clockOffset);
   preferences.putBool("showClock", settings.showClock);
