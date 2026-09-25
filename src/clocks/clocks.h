@@ -62,6 +62,10 @@ void updateDigitBounce();
 // Calculate target digits for minute changes
 void calculateTargetDigits(int current_hour, int current_min, bool current_is_pm);
 
+// ========== Stock Ticker Clock (style 18) ==========
+void displayClockWithTicker();
+void resetTickerAnimation();
+
 // ========== Standard Clock ==========
 void displayStandardClock();
 

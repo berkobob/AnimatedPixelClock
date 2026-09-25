@@ -165,6 +165,9 @@ void loadSettings() {
     settings.weatherLon = 0;
     settings.weatherUseFahrenheit = false;
     settings.weatherApiKey[0] = '\0';
+    settings.tickerSymbols[0] = '\0';
+    settings.tickerRefresh = 10;
+    settings.tickerSpeed = 1;
     settings.ambientEnabled = false;
     settings.ambientStyle = 0;
     settings.ambientStartHour = 20;
@@ -395,6 +398,15 @@ void loadSettings() {
   String loadedWeatherKey = preferences.getString("weatherKey", "");
   strncpy(settings.weatherApiKey, loadedWeatherKey.c_str(), 32);
   settings.weatherApiKey[32] = '\0';
+  String loadedTickSyms = preferences.getString("tickSyms", "");
+  strlcpy(settings.tickerSymbols, loadedTickSyms.c_str(),
+          sizeof(settings.tickerSymbols));
+  settings.tickerRefresh = preferences.getUChar("tickRefresh", 10);
+  if (settings.tickerRefresh != 5 && settings.tickerRefresh != 10 &&
+      settings.tickerRefresh != 15)
+    settings.tickerRefresh = 10;
+  settings.tickerSpeed = preferences.getUChar("tickSpeed", 1);
+  if (settings.tickerSpeed > 2) settings.tickerSpeed = 1;
   settings.ambientEnabled =
       preferences.getBool("ambEn", false); // Default: Disabled
   settings.ambientStyle =
@@ -774,6 +786,9 @@ void saveSettings() {
   preferences.putFloat("weatherLon", settings.weatherLon);
   preferences.putBool("weatherF", settings.weatherUseFahrenheit);
   preferences.putString("weatherKey", settings.weatherApiKey);
+  preferences.putString("tickSyms", settings.tickerSymbols);
+  preferences.putUChar("tickRefresh", settings.tickerRefresh);
+  preferences.putUChar("tickSpeed", settings.tickerSpeed);
   preferences.putBool("ambEn", settings.ambientEnabled);
   preferences.putUChar("ambStyle", settings.ambientStyle);
   preferences.putUChar("ambStart", settings.ambientStartHour);

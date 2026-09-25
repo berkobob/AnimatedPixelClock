@@ -87,6 +87,11 @@ bool isAnimationActive() {
     return true;
   }
 
+  // Stock Ticker (18) - the price band scrolls continuously
+  if (settings.clockStyle == 18) {
+    return true;
+  }
+
   // Standard and Large clocks (clockStyle 1 & 2) have no animations
   return false;
 }
