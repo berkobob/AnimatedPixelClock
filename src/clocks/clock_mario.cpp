@@ -124,8 +124,13 @@ void displayClockWithMario() {
   int dateW = formatDateString(dateStr, sizeof(dateStr), timeinfo, settings.showWeekday);
 
   int date_x = (SCREEN_WIDTH - dateW) / 2;
-  // The coin counter ("x00") ends at x=24; keep a wide date clear of it
-  if (settings.marioIdleEncounters && date_x < 25) date_x = 25;
+  if (settings.marioIdleEncounters) {
+    // Coin counter owns the left of the top row: right-align the date,
+    // stopping short of AM/PM (x=110) in 12-hour mode
+    int right = settings.use24Hour ? SCREEN_WIDTH - 2 : 108;
+    date_x = right - dateW;
+    if (date_x < 25) date_x = 25;  // never run into "x00" (ends at x=24)
+  }
   display.setCursor(date_x, 4);
   display.print(dateStr);
   drawMeridiemIndicator(110, 4, displayed_is_pm);
