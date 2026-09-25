@@ -119,6 +119,9 @@ static void drawArrow(int x, int y, int8_t dir, uint16_t color) {
 
 static void drawBandAt(int x) {
   display.setTextSize(1);
+  // GFX wraps a glyph that crosses the right edge onto the next line (y+8)
+  // instead of clipping it. Clip instead, and restore the default after.
+  display.setTextWrap(false);
   for (uint8_t i = 0; i < segCount && x < SCREEN_WIDTH; ++i) {
     int w = segWidth(segs[i]);
     if (x + w > 0) {  // skip segments fully off the left edge
@@ -133,6 +136,7 @@ static void drawBandAt(int x) {
     x += w;
   }
   display.setTextColor(DISPLAY_WHITE);
+  display.setTextWrap(true);
 }
 
 void resetTickerAnimation() {
