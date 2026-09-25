@@ -21,9 +21,7 @@
 #define TK_BAND_Y 50
 #define TK_ITEM_GAP "   "  // 18 px between symbols
 
-// RGB565
-#define TK_GREEN 0x07E0
-#define TK_RED 0xF800
+// RGB565. Up/down/symbol/digit colours are user slots (COL_TICKER_*).
 #define TK_GREY 0x8410
 #define TK_DIM 0x4208
 
@@ -84,7 +82,7 @@ static int buildBand(const TickerSnapshot& snap) {
     for (uint8_t i = 0; i < snap.count; ++i) {
       const TickerQuote& q = snap.quotes[i];
       snprintf(buf, sizeof(buf), "%s ", q.symbol);
-      addText(buf, DISPLAY_WHITE);
+      addText(buf, SPRITE_COLOR(COL_TICKER_SYMBOL));
       if (q.notFound) {
         addText("?" TK_ITEM_GAP, TK_GREY);
         continue;
@@ -99,7 +97,8 @@ static int buildBand(const TickerSnapshot& snap) {
 
       float pct = q.changePct;
       bool flat = fabsf(pct) < 0.005f;
-      uint16_t c = flat ? TK_GREY : (pct > 0 ? TK_GREEN : TK_RED);
+      uint16_t c = flat ? TK_GREY
+                        : SPRITE_COLOR(pct > 0 ? COL_TICKER_UP : COL_TICKER_DOWN);
       if (!flat) addArrow(pct > 0 ? 1 : -1, c);
       snprintf(buf, sizeof(buf), "%.2f%%", fabsf(pct));
       addText(buf, c);

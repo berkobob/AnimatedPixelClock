@@ -103,6 +103,11 @@ enum ColorSlot {
   COL_DOOM_FLAME,      // mid heat
   COL_DOOM_CORE,       // white-hot core (digits and the ground line)
   COL_DIGITS_S17,      // Doom Fire (separate from the historical contiguous slots)
+  // Stock Ticker (style 18)
+  COL_DIGITS_S18,      // time + prices (separate from the historical contiguous slots)
+  COL_TICKER_UP,       // rising change: arrow + percent
+  COL_TICKER_DOWN,     // falling change: arrow + percent
+  COL_TICKER_SYMBOL,   // symbol names in the scrolling band
   // ...append future slots here (before COL_COUNT)
   COL_COUNT
 };
