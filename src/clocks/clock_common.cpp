@@ -387,27 +387,11 @@ void displayLargeClock() {
   // so it does not collide with the oversized minute digits.
   drawMeridiemIndicator(110, 54, isPM);
 
-  // Date at bottom
+  // Date at bottom (optionally prefixed with the weekday)
   display.setTextSize(1);
-  char dateStr[12];
-
-  switch (settings.dateFormat) {
-    case 0:  // DD/MM/YYYY
-      sprintf(dateStr, "%02d/%02d/%04d", timeinfo.tm_mday, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900);
-      break;
-    case 1:  // MM/DD/YYYY
-      sprintf(dateStr, "%02d/%02d/%04d", timeinfo.tm_mon + 1, timeinfo.tm_mday, timeinfo.tm_year + 1900);
-      break;
-    case 2:  // YYYY-MM-DD
-      sprintf(dateStr, "%04d-%02d-%02d", timeinfo.tm_year + 1900, timeinfo.tm_mon + 1, timeinfo.tm_mday);
-      break;
-    case 3:  // DD.MM.YYYY
-      sprintf(dateStr, "%02d.%02d.%04d", timeinfo.tm_mday, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900);
-      break;
-  }
-
-  int date_x = (SCREEN_WIDTH - 60) / 2;
-  display.setCursor(date_x, 54);
+  char dateStr[16];
+  int date_w = formatDateString(dateStr, sizeof(dateStr), timeinfo, settings.showWeekday);
+  display.setCursor((SCREEN_WIDTH - date_w) / 2, 54);
   display.print(dateStr);
 
   // Draw no-WiFi icon if disconnected
