@@ -1923,9 +1923,9 @@ var cycleNames = {0:'Mario',1:'Standard',2:'Large',3:'Space Invaders',5:'Arkanoi
 var cycleItems = [];
 function initCycle() {
  cycleItems = cycleInput.value.split(',').map(function(v) { var p=v.split(':'); return {id:Number(p[0]),seconds:Number(p[1]),enabled:Number(p[1])>0}; });
- if (!cycleItems.some(function(v){return v.id===15;})) cycleItems.push({id:15,seconds:300,enabled:false});
- if (!cycleItems.some(function(v){return v.id===16;})) cycleItems.push({id:16,seconds:300,enabled:false});
- if (!cycleItems.some(function(v){return v.id===17;})) cycleItems.push({id:17,seconds:300,enabled:false});
+ // Faces added after this rotation was saved: append them, disabled.
+ Object.keys(cycleNames).forEach(function(k){ var id=Number(k);
+  if (!cycleItems.some(function(v){return v.id===id;})) cycleItems.push({id:id,seconds:300,enabled:false}); });
  drawCycle();
 }
 function saveCycle() { cycleInput.value=cycleItems.map(function(v){return v.id+':'+(v.enabled?v.seconds:0);}).join(','); cycleInput.dispatchEvent(new Event('change',{bubbles:true})); }
