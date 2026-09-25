@@ -14,6 +14,7 @@
 // call it in place of the old global digitColor().
 uint16_t digitColor() {
   uint8_t s = settings.clockStyle;
+  if (s == 18) return SPRITE_COLOR(COL_DIGITS_S18);
   if (s == 17) return SPRITE_COLOR(COL_DIGITS_S17);
   if (s == 16) return SPRITE_COLOR(COL_DIGITS_S16);
   if (s == 15) return SPRITE_COLOR(COL_DIGITS_S15);

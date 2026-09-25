@@ -79,6 +79,10 @@ const uint16_t SPRITE_COLOR_DEFAULTS[] = {
     /* COL_DOOM_FLAME     */ 0xCB61,  // orange, classic Doom ramp middle
     /* COL_DOOM_CORE      */ 0xFFFF,  // white-hot
     /* COL_DIGITS_S17     */ 0xFFFF,  // white
+    /* COL_DIGITS_S18     */ 0xFFFF,  // white
+    /* COL_TICKER_UP      */ 0x07E0,  // green
+    /* COL_TICKER_DOWN    */ 0xF800,  // red
+    /* COL_TICKER_SYMBOL  */ 0xFFFF,  // white
 };
 void applyScopeDefaults() {
   settings.scopeGrid = true;

@@ -678,6 +678,9 @@ static const SpriteColorRow SPRITE_COLOR_ROWS[] = {
     {COL_DOOM_EMBER, 17, "Flame (coolest)"},
     {COL_DOOM_FLAME, 17, "Flame (middle)"},
     {COL_DOOM_CORE, 17, "Flame (hottest)"},
+    {COL_TICKER_SYMBOL, 18, "Symbols"},
+    {COL_TICKER_UP, 18, "Price up"},
+    {COL_TICKER_DOWN, 18, "Price down"},
     {COL_WEATHER_ICON, 14, "Icon"},
     {COL_WEATHER_ACCENT, 14, "Rain / effects"},
     {COL_WEATHER_TEMP, 14, "Temperature"},
@@ -705,7 +708,7 @@ static const StyleCard STYLE_CARDS[] = {
 // Clock styles that appear in the style selector, each shown a per-style digit
 // color row. Order = display order. (Style 4 is a non-selectable variant of 3 and
 // has no picker; its digit slot still exists and defaults to white.)
-static const int DIGIT_STYLES[] = {0, 1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
+static const int DIGIT_STYLES[] = {0, 1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18};
 
 // "HH:MM" for the page's time inputs, as the template's V_DIMSTART built it.
 static String hhmm(uint8_t hour, uint8_t minute) {
@@ -716,7 +719,8 @@ static String hhmm(uint8_t hour, uint8_t minute) {
 
 // The per-style time-digit color slot (as buildDigitRow picks it).
 static uint8_t digitColorSlot(int style) {
-  return (uint8_t)(style == 17 ? COL_DIGITS_S17
+  return (uint8_t)(style == 18 ? COL_DIGITS_S18
+                 : style == 17 ? COL_DIGITS_S17
                                : style == 16 ? COL_DIGITS_S16
                                              : style == 15 ? COL_DIGITS_S15 : COL_DIGITS_S0 + style);
 }
