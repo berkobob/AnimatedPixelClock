@@ -64,6 +64,7 @@ int getOptimalRefreshRate();
 #include "ambient/anim_store.h"
 #include "display/display.h"
 #include "clocks/clocks.h"
+#include "led/led_strip.h"
 #include "clocks/clock_globals.h"
 #include "metrics/metrics.h"
 #include "network/network.h"
@@ -294,6 +295,9 @@ void setup() {
   metricData.status = 0;  // No status received yet
   Serial.println("Waiting for PC stats data...");
 
+  // Optional WS2812B accent strip, dark until enabled
+  ledInit();
+
   // Setup web server
   setupWebServer();
 
@@ -321,8 +325,13 @@ void loop() {
   // Background weather fetch: starts a one-shot task when one is due
   weatherLoop();
 
+<<<<<<< HEAD
   // Background stock-ticker fetch (same one-shot task pattern)
   tickerLoop();
+=======
+  // Accent strip
+  ledLoop();
+>>>>>>> origin/main
 
   // Crash report: note when this boot started, once the time is synced
   crashReportLoop();
