@@ -770,14 +770,9 @@ void displayClockWithTetris() {
   // Date (optional; top or bottom) - hidden while the idle game is on
   if (tetDateShown()) {
     display.setTextSize(1);
-    char dateStr[12];
-    switch (settings.dateFormat) {
-      case 0: sprintf(dateStr, "%02d/%02d/%04d", timeinfo.tm_mday, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900); break;
-      case 1: sprintf(dateStr, "%02d/%02d/%04d", timeinfo.tm_mon + 1, timeinfo.tm_mday, timeinfo.tm_year + 1900); break;
-      case 2: sprintf(dateStr, "%04d-%02d-%02d", timeinfo.tm_year + 1900, timeinfo.tm_mon + 1, timeinfo.tm_mday); break;
-      case 3: sprintf(dateStr, "%02d.%02d.%04d", timeinfo.tm_mday, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900); break;
-    }
-    display.setCursor((SCREEN_WIDTH - 60) / 2, tetDateY());
+    char dateStr[16];
+    int dateW = formatDateString(dateStr, sizeof(dateStr), timeinfo, settings.showWeekday);
+    display.setCursor((SCREEN_WIDTH - dateW) / 2, tetDateY());
     display.print(dateStr);
   }
   drawMeridiemIndicator(110, 4, displayed_is_pm);

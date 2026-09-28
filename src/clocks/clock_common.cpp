@@ -14,6 +14,7 @@
 // call it in place of the old global digitColor().
 uint16_t digitColor() {
   uint8_t s = settings.clockStyle;
+  if (s == 18) return SPRITE_COLOR(COL_DIGITS_S18);
   if (s == 17) return SPRITE_COLOR(COL_DIGITS_S17);
   if (s == 16) return SPRITE_COLOR(COL_DIGITS_S16);
   if (s == 15) return SPRITE_COLOR(COL_DIGITS_S15);
@@ -72,6 +73,24 @@ void formatTimeForDisplay(int hour24, int minute, int& displayHour,
       displayHour = 12;
     }
   }
+}
+
+int formatDateString(char* buf, size_t len, const struct tm& t, bool withWeekday) {
+  // tm_wday counts days since Sunday (0-6), per the C standard
+  static const char* const kWeekdays[7] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+  const int d = t.tm_mday, m = t.tm_mon + 1, y = t.tm_year + 1900;
+
+  int n = 0;
+  if (withWeekday && t.tm_wday >= 0 && t.tm_wday < 7) {
+    n = snprintf(buf, len, "%s ", kWeekdays[t.tm_wday]);
+  }
+  switch (settings.dateFormat) {
+    case 1:  snprintf(buf + n, len - n, "%02d/%02d/%04d", m, d, y); break;  // MM/DD/YYYY
+    case 2:  snprintf(buf + n, len - n, "%04d-%02d-%02d", y, m, d); break;  // YYYY-MM-DD
+    case 3:  snprintf(buf + n, len - n, "%02d.%02d.%04d", d, m, y); break;  // DD.MM.YYYY
+    default: snprintf(buf + n, len - n, "%02d/%02d/%04d", d, m, y); break;  // DD/MM/YYYY
+  }
+  return (int)strlen(buf) * 6;
 }
 
 void syncDisplayedTime(const struct tm* timeinfo) {
@@ -369,27 +388,11 @@ void displayLargeClock() {
   // so it does not collide with the oversized minute digits.
   drawMeridiemIndicator(110, 54, isPM);
 
-  // Date at bottom
+  // Date at bottom (optionally prefixed with the weekday)
   display.setTextSize(1);
-  char dateStr[12];
-
-  switch (settings.dateFormat) {
-    case 0:  // DD/MM/YYYY
-      sprintf(dateStr, "%02d/%02d/%04d", timeinfo.tm_mday, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900);
-      break;
-    case 1:  // MM/DD/YYYY
-      sprintf(dateStr, "%02d/%02d/%04d", timeinfo.tm_mon + 1, timeinfo.tm_mday, timeinfo.tm_year + 1900);
-      break;
-    case 2:  // YYYY-MM-DD
-      sprintf(dateStr, "%04d-%02d-%02d", timeinfo.tm_year + 1900, timeinfo.tm_mon + 1, timeinfo.tm_mday);
-      break;
-    case 3:  // DD.MM.YYYY
-      sprintf(dateStr, "%02d.%02d.%04d", timeinfo.tm_mday, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900);
-      break;
-  }
-
-  int date_x = (SCREEN_WIDTH - 60) / 2;
-  display.setCursor(date_x, 54);
+  char dateStr[16];
+  int date_w = formatDateString(dateStr, sizeof(dateStr), timeinfo, settings.showWeekday);
+  display.setCursor((SCREEN_WIDTH - date_w) / 2, 54);
   display.print(dateStr);
 
   // Draw no-WiFi icon if disconnected

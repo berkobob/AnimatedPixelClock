@@ -19,6 +19,7 @@
 #include "../notify/notify.h"
 #include "../timezones.h"
 #include "../viz/visualizer.h"
+#include "../ticker/ticker.h"
 #include "../weather/weather.h"
 #include "web_pages.h"
 #include "web_assets.h"
@@ -317,16 +318,16 @@ void handleModeViz() {
  server.send(200, "application/json", "{\"success\":true,\"mode\":\"viz\"}");
 }
 
-// GET /api/clock/style?id=0-17 - switch the active clock animation
+// GET /api/clock/style?id=0-18 - switch the active clock animation
 void handleSetClockStyle() {
  server.sendHeader("Access-Control-Allow-Origin", "*");
  if (!server.hasArg("id")) {
-   server.send(400, "application/json", "{\"error\":\"Missing id (0-17)\"}");
+   server.send(400, "application/json", "{\"error\":\"Missing id (0-18)\"}");
    return;
  }
  int id = server.arg("id").toInt();
- if (id < 0 || id > 17) {
-   server.send(400, "application/json", "{\"error\":\"id must be 0-17\"}");
+ if (id < 0 || id > 18) {
+   server.send(400, "application/json", "{\"error\":\"id must be 0-18\"}");
    return;
  }
  settings.clockStyle = (uint8_t)id;
@@ -678,6 +679,9 @@ static const SpriteColorRow SPRITE_COLOR_ROWS[] = {
     {COL_DOOM_EMBER, 17, "Flame (coolest)"},
     {COL_DOOM_FLAME, 17, "Flame (middle)"},
     {COL_DOOM_CORE, 17, "Flame (hottest)"},
+    {COL_TICKER_SYMBOL, 18, "Symbols"},
+    {COL_TICKER_UP, 18, "Price up"},
+    {COL_TICKER_DOWN, 18, "Price down"},
     {COL_WEATHER_ICON, 14, "Icon"},
     {COL_WEATHER_ACCENT, 14, "Rain / effects"},
     {COL_WEATHER_TEMP, 14, "Temperature"},
@@ -701,12 +705,13 @@ static const StyleCard STYLE_CARDS[] = {
     {6, "pacmanSettings"},  {7, "snakeSettings"},  {8, "tetrisSettings"},
     {10, "asteroidsSettings"}, {11, "dinoSettings"}, {12, "matrixSettings"},
     {14, "weatherSettings"}, {16, "tronSettings"}, {17, "doomSettings"},
+    {18, "tickerSettings"},
 };
 
 // Clock styles that appear in the style selector, each shown a per-style digit
 // color row. Order = display order. (Style 4 is a non-selectable variant of 3 and
 // has no picker; its digit slot still exists and defaults to white.)
-static const int DIGIT_STYLES[] = {0, 1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
+static const int DIGIT_STYLES[] = {0, 1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18};
 
 // "HH:MM" for the page's time inputs, as the template's V_DIMSTART built it.
 static String hhmm(uint8_t hour, uint8_t minute) {
@@ -717,7 +722,8 @@ static String hhmm(uint8_t hour, uint8_t minute) {
 
 // The per-style time-digit color slot (as buildDigitRow picks it).
 static uint8_t digitColorSlot(int style) {
-  return (uint8_t)(style == 17 ? COL_DIGITS_S17
+  return (uint8_t)(style == 18 ? COL_DIGITS_S18
+                 : style == 17 ? COL_DIGITS_S17
                                : style == 16 ? COL_DIGITS_S16
                                              : style == 15 ? COL_DIGITS_S15 : COL_DIGITS_S0 + style);
 }
@@ -807,6 +813,7 @@ void handlePortalValues() {
   form["matrixRainDensity"] = settings.matrixRainDensity;
   form["doomWind"] = settings.doomWind;
   form["dateFormat"] = settings.dateFormat;
+  form["showWeekday"] = settings.showWeekday;
   form["colonBlinkMode"] = settings.colonBlinkMode;
   form["ambientStyle"] = settings.ambientStyle;
   form["notifyPosition"] = settings.notifyPosition;
@@ -882,6 +889,9 @@ void handlePortalValues() {
   form["weatherLon"] = String(settings.weatherLon, 4);
   form["weatherFahrenheit"] = settings.weatherUseFahrenheit;
   form["weatherApiKey"] = settings.weatherApiKey;
+  form["tickerSymbols"] = settings.tickerSymbols;
+  form["tickerRefresh"] = settings.tickerRefresh;
+  form["tickerSpeed"] = settings.tickerSpeed;
   form["colonBlinkRate"] = settings.colonBlinkRate;
   form["displayBrightness"] = settings.displayBrightness;
   form["enableScheduledDimming"] = settings.enableScheduledDimming;
@@ -1104,6 +1114,9 @@ void handleSave() {
  if (server.hasArg("dateFormat")) {
  settings.dateFormat = server.arg("dateFormat").toInt();
  }
+ if (server.hasArg("showWeekday")) {
+ settings.showWeekday = server.arg("showWeekday").toInt() == 1;
+ }
 
  // Save clock position
  if (server.hasArg("clockPosition")) {
@@ -1242,6 +1255,17 @@ void handleSave() {
  }
  }
  weatherSettingsChanged(); // fetch now for the new location
+ }
+
+ // Save stock ticker settings (only when the Ticker subcard posted them)
+ if (server.hasArg("tickerSymbols")) {
+ tickerNormalizeSymbols(server.arg("tickerSymbols").c_str(),
+                        settings.tickerSymbols, sizeof(settings.tickerSymbols));
+ int r = server.arg("tickerRefresh").toInt();
+ if (r == 5 || r == 10 || r == 15) settings.tickerRefresh = (uint8_t)r;
+ int sp = server.arg("tickerSpeed").toInt();
+ if (sp >= 0 && sp <= 2) settings.tickerSpeed = (uint8_t)sp;
+ tickerSettingsChanged(); // fetch now for the new symbols
  }
 
  // Save ambient screensaver settings (guard on a field that always posts so
@@ -1672,7 +1696,7 @@ void handleSave() {
  }
 
  // Validate settings bounds before saving
- assertBounds(settings.clockStyle, 0, 17, "clockStyle");
+ assertBounds(settings.clockStyle, 0, 18, "clockStyle");
  assertBounds(settings.gmtOffset, -720, 840, "gmtOffset"); // -12h to +14h in minutes
  assertBounds(settings.clockPosition, 0, 2, "clockPosition");
  assertBounds(settings.displayRowMode, 0, 3, "displayRowMode");
@@ -1827,6 +1851,7 @@ void handleExportConfig() {
  json += "\"daylightSaving\":" + String(settings.daylightSaving ? "true" : "false") + ",";
  json += "\"use24Hour\":" + String(settings.use24Hour ? "true" : "false") + ",";
  json += "\"dateFormat\":" + String(settings.dateFormat) + ",";
+ json += "\"showWeekday\":" + String(settings.showWeekday ? "true" : "false") + ",";
  json += "\"clockPosition\":" + String(settings.clockPosition) + ",";
  json += "\"clockOffset\":" + String(settings.clockOffset) + ",";
  json += "\"showClock\":" + String(settings.showClock ? "true" : "false") + ",";
@@ -1844,6 +1869,10 @@ void handleExportConfig() {
  json += "\"weatherLon\":" + String(settings.weatherLon, 4) + ",";
  json += "\"weatherUseFahrenheit\":" + String(settings.weatherUseFahrenheit ? "true" : "false") + ",";
  json += "\"weatherApiKey\":\"" + String(settings.weatherApiKey) + "\",";
+ // Safe to embed unescaped: the normalizer only stores A-Z 0-9 . - ^ = ,
+ json += "\"tickerSymbols\":\"" + String(settings.tickerSymbols) + "\",";
+ json += "\"tickerRefresh\":" + String(settings.tickerRefresh) + ",";
+ json += "\"tickerSpeed\":" + String(settings.tickerSpeed) + ",";
  json += "\"ambientEnabled\":" + String(settings.ambientEnabled ? "true" : "false") + ",";
  json += "\"ambientStyle\":" + String(settings.ambientStyle) + ",";
  json += "\"ambientStartHour\":" + String(settings.ambientStartHour) + ",";
@@ -2129,6 +2158,7 @@ void handleImportConfig() {
  if (!doc["daylightSaving"].isNull()) settings.daylightSaving = doc["daylightSaving"];
  if (!doc["use24Hour"].isNull()) settings.use24Hour = doc["use24Hour"];
  if (!doc["dateFormat"].isNull()) settings.dateFormat = doc["dateFormat"];
+ if (!doc["showWeekday"].isNull()) settings.showWeekday = doc["showWeekday"];
  if (!doc["clockPosition"].isNull()) settings.clockPosition = doc["clockPosition"];
  if (!doc["clockOffset"].isNull()) settings.clockOffset = doc["clockOffset"];
  if (!doc["showClock"].isNull()) settings.showClock = doc["showClock"];
@@ -2148,6 +2178,17 @@ void handleImportConfig() {
      strncpy(settings.weatherApiKey, key, 32);
      settings.weatherApiKey[32] = '\0';
    }
+ }
+ if (!doc["tickerSymbols"].isNull())
+   tickerNormalizeSymbols(doc["tickerSymbols"] | "", settings.tickerSymbols,
+                          sizeof(settings.tickerSymbols));
+ if (!doc["tickerRefresh"].isNull()) {
+   int r = doc["tickerRefresh"].as<int>();
+   if (r == 5 || r == 10 || r == 15) settings.tickerRefresh = (uint8_t)r;
+ }
+ if (!doc["tickerSpeed"].isNull()) {
+   int sp = doc["tickerSpeed"].as<int>();
+   if (sp >= 0 && sp <= 2) settings.tickerSpeed = (uint8_t)sp;
  }
  if (!doc["ambientEnabled"].isNull()) settings.ambientEnabled = doc["ambientEnabled"];
  // Read as int and normalize so the retired lava slot (2) or a bad value maps
@@ -2315,6 +2356,7 @@ void handleImportConfig() {
  applyTimezone();
  ntpSynced = false; // Force NTP resync after config import
  weatherSettingsChanged(); // imported location may differ - refetch now
+ tickerSettingsChanged();  // imported symbols may differ - refetch now
 
  // Imported config can change clockStyle. Reset every clock's animation
  // state so a previous in-flight animation doesn't carry stale time

@@ -27,6 +27,11 @@ bool shouldShowColon();
 void formatTimeForDisplay(int hour24, int minute, int& displayHour,
                           int& displayMin, bool& isPM);
 
+// Build the date string in the configured dateFormat, optionally prefixed
+// with the abbreviated weekday ("Mon 25/09/2026"). buf needs >= 16 bytes.
+// Returns the rendered width in pixels at text size 1 (6 px per char).
+int formatDateString(char* buf, size_t len, const struct tm& t, bool withWeekday);
+
 // Sync the shared rendered clock state from real time
 void syncDisplayedTime(const struct tm* timeinfo);
 
@@ -56,6 +61,10 @@ void updateDigitBounce();
 
 // Calculate target digits for minute changes
 void calculateTargetDigits(int current_hour, int current_min, bool current_is_pm);
+
+// ========== Stock Ticker Clock (style 18) ==========
+void displayClockWithTicker();
+void resetTickerAnimation();
 
 // ========== Standard Clock ==========
 void displayStandardClock();

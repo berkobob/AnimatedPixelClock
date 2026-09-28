@@ -80,8 +80,15 @@ const uint16_t SPRITE_COLOR_DEFAULTS[] = {
     /* COL_DOOM_FLAME     */ 0xCB61,  // orange, classic Doom ramp middle
     /* COL_DOOM_CORE      */ 0xFFFF,  // white-hot
     /* COL_DIGITS_S17     */ 0xFFFF,  // white
+<<<<<<< HEAD
+    /* COL_DIGITS_S18     */ 0xFFFF,  // white
+    /* COL_TICKER_UP      */ 0x07E0,  // green
+    /* COL_TICKER_DOWN    */ 0xF800,  // red
+    /* COL_TICKER_SYMBOL  */ 0xFFFF,  // white
+=======
     /* COL_LED_STRIP      */ 0xFD20,  // warm amber
     /* COL_LED_SECONDS    */ 0x07FF,  // cyan, reads against the amber bar
+>>>>>>> origin/main
 };
 void applyScopeDefaults() {
   settings.scopeGrid = true;
@@ -135,6 +142,7 @@ void loadSettings() {
     strcpy(settings.timezoneString, "CET-1CEST,M3.5.0/02:00,M10.5.0/03:00"); // Default: Central European
     settings.use24Hour = true;
     settings.dateFormat = 0;
+    settings.showWeekday = false;
     settings.clockPosition = 0; // Center by default
     settings.clockOffset = 0;   // No offset by default
     settings.showClock = true;
@@ -167,6 +175,9 @@ void loadSettings() {
     settings.weatherLon = 0;
     settings.weatherUseFahrenheit = false;
     settings.weatherApiKey[0] = '\0';
+    settings.tickerSymbols[0] = '\0';
+    settings.tickerRefresh = 10;
+    settings.tickerSpeed = 1;
     settings.ambientEnabled = false;
     settings.ambientStyle = 0;
     settings.ambientStartHour = 20;
@@ -222,6 +233,7 @@ void loadSettings() {
     preferences.putString("tz", "CET-1CEST,M3.5.0/02:00,M10.5.0/03:00"); // Default: Central European
     preferences.putBool("use24Hour", true);
     preferences.putInt("dateFormat", 0);
+    preferences.putBool("showWeekday", false);
     preferences.putInt("clockPos", 0);    // Center
     preferences.putInt("clockOffset", 0); // No offset
     preferences.putBool("showClock", true);
@@ -339,6 +351,7 @@ void loadSettings() {
   settings.use24Hour = preferences.getBool("use24Hour", true); // Default: 24h
   settings.dateFormat =
       preferences.getInt("dateFormat", 0); // Default: DD/MM/YYYY
+  settings.showWeekday = preferences.getBool("showWeekday", false);
   settings.clockPosition = preferences.getInt("clockPos", 0); // Default: Center
   settings.clockOffset =
       preferences.getInt("clockOffset", 0); // Default: No offset
@@ -395,6 +408,15 @@ void loadSettings() {
   String loadedWeatherKey = preferences.getString("weatherKey", "");
   strncpy(settings.weatherApiKey, loadedWeatherKey.c_str(), 32);
   settings.weatherApiKey[32] = '\0';
+  String loadedTickSyms = preferences.getString("tickSyms", "");
+  strlcpy(settings.tickerSymbols, loadedTickSyms.c_str(),
+          sizeof(settings.tickerSymbols));
+  settings.tickerRefresh = preferences.getUChar("tickRefresh", 10);
+  if (settings.tickerRefresh != 5 && settings.tickerRefresh != 10 &&
+      settings.tickerRefresh != 15)
+    settings.tickerRefresh = 10;
+  settings.tickerSpeed = preferences.getUChar("tickSpeed", 1);
+  if (settings.tickerSpeed > 2) settings.tickerSpeed = 1;
   settings.ambientEnabled =
       preferences.getBool("ambEn", false); // Default: Disabled
   settings.ambientStyle =
@@ -778,6 +800,7 @@ void saveSettings() {
   preferences.putUChar("tzIdx", settings.timezoneIndex); // Timezone region index
   preferences.putBool("use24Hour", settings.use24Hour);
   preferences.putInt("dateFormat", settings.dateFormat);
+  preferences.putBool("showWeekday", settings.showWeekday);
   preferences.putInt("clockPos", settings.clockPosition);
   preferences.putInt("clockOffset", settings.clockOffset);
   preferences.putBool("showClock", settings.showClock);
@@ -808,6 +831,9 @@ void saveSettings() {
   preferences.putFloat("weatherLon", settings.weatherLon);
   preferences.putBool("weatherF", settings.weatherUseFahrenheit);
   preferences.putString("weatherKey", settings.weatherApiKey);
+  preferences.putString("tickSyms", settings.tickerSymbols);
+  preferences.putUChar("tickRefresh", settings.tickerRefresh);
+  preferences.putUChar("tickSpeed", settings.tickerSpeed);
   preferences.putBool("ambEn", settings.ambientEnabled);
   preferences.putUChar("ambStyle", settings.ambientStyle);
   preferences.putUChar("ambStart", settings.ambientStartHour);

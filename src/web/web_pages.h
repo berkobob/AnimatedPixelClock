@@ -145,6 +145,7 @@ static const char PAGE_HTML[] PROGMEM = R"PAGE(<!doctype html>
                   <option value="15">Bomberman</option>
                   <option value="16">TRON</option>
                   <option value="17">Doom Fire</option>
+                  <option value="18">Stock Ticker</option>
                   <option value="9">Custom rotation</option>
                 </select>
               </div>
@@ -676,6 +677,39 @@ static const char PAGE_HTML[] PROGMEM = R"PAGE(<!doctype html>
               <p class="field-hint">The digits are heat sources: they burn white-hot and throw their own flames. A changed digit burns away and the new one re-ignites.</p>
             </div>
 
+            <!-- Stock Ticker (style 18) -->
+            <div class="subcard" id="tickerSettings" style="display:none">
+              <div class="field" style="margin:0">
+                <label class="field-label" for="tickerSymbols">Symbols</label>
+                <input type="text" name="tickerSymbols" id="tickerSymbols" maxlength="80" value="" placeholder="VOD.L, BARC.L, AAPL" autocapitalize="characters" spellcheck="false">
+                <p class="field-hint">Up to 8 Yahoo Finance symbols, comma-separated. London stocks end in .L (VOD.L); US stocks have no suffix (AAPL). Prices are delayed and come from an unofficial Yahoo endpoint that may occasionally be unavailable.</p>
+              </div>
+              <div class="grid-2" style="margin-top:12px">
+                <div class="field" style="margin-bottom:0">
+                  <label class="field-label" for="tickerRefresh">Refresh every</label>
+                  <div class="select-wrap">
+                    <select name="tickerRefresh" id="tickerRefresh">
+                      <option value="5">5 minutes</option>
+                      <option value="10">10 minutes</option>
+                      <option value="15">15 minutes</option>
+                    </select>
+                  </div>
+                  <p class="field-hint">Each refresh makes one request per symbol. Default 10 minutes.</p>
+                </div>
+                <div class="field" style="margin-bottom:0">
+                  <label class="field-label" for="tickerSpeed">Scroll speed</label>
+                  <div class="select-wrap">
+                    <select name="tickerSpeed" id="tickerSpeed">
+                      <option value="0">Slow</option>
+                      <option value="1">Normal</option>
+                      <option value="2">Fast</option>
+                    </select>
+                  </div>
+                  <p class="field-hint">Default Normal.</p>
+                </div>
+              </div>
+            </div>
+
             <!-- Weather Clock (style 14) -->
             <div class="subcard" id="weatherSettings" style="display:none">
               <label class="check-row standalone">
@@ -734,6 +768,15 @@ static const char PAGE_HTML[] PROGMEM = R"PAGE(<!doctype html>
                     <option value="1">MM/DD/YYYY</option>
                     <option value="2">YYYY-MM-DD</option>
                     <option value="3">DD.MM.YYYY</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field" style="margin-bottom:0">
+                <label class="field-label" for="showWeekday">Weekday</label>
+                <div class="select-wrap">
+                  <select name="showWeekday" id="showWeekday">
+                    <option value="0">Hidden &middot; 25/09/2026</option>
+                    <option value="1">Shown &middot; Fri 25/09/2026</option>
                   </select>
                 </div>
               </div>
@@ -1548,8 +1591,8 @@ var marioEnc = $('#marioIdleEncounters');
 if (marioEnc) { var fe = function () { toggle($('#marioEncFields'), marioEnc.checked); }; marioEnc.addEventListener('change', fe); syncs.push(fe); }
 var tetSmallClk = $('#tetrisSmallClock');
 if (tetSmallClk) { var ftsc = function () { toggle($('#tetrisSmallClockField'), tetSmallClk.checked); }; tetSmallClk.addEventListener('change', ftsc); syncs.push(ftsc); }
-var STYLE_PANELS = { '0':'marioSettings','3':'spaceSettings','4':'spaceSettings','5':'pongSettings','6':'pacmanSettings','7':'snakeSettings','8':'tetrisSettings','10':'asteroidsSettings','11':'dinoSettings','12':'matrixSettings','14':'weatherSettings','16':'tronSettings','17':'doomSettings' };
-var ALL_PANELS = ['marioSettings','spaceSettings','pongSettings','pacmanSettings','snakeSettings','tetrisSettings','asteroidsSettings','dinoSettings','matrixSettings','weatherSettings','tronSettings'];
+var STYLE_PANELS = { '0':'marioSettings','3':'spaceSettings','4':'spaceSettings','5':'pongSettings','6':'pacmanSettings','7':'snakeSettings','8':'tetrisSettings','10':'asteroidsSettings','11':'dinoSettings','12':'matrixSettings','14':'weatherSettings','16':'tronSettings','17':'doomSettings','18':'tickerSettings' };
+var ALL_PANELS = ['marioSettings','spaceSettings','pongSettings','pacmanSettings','snakeSettings','tetrisSettings','asteroidsSettings','dinoSettings','matrixSettings','weatherSettings','tronSettings','doomSettings','tickerSettings'];
 var clockStyle = $('#clockStyle');
 function syncClockPanels() {
 ALL_PANELS.forEach(function (id) {
@@ -2049,13 +2092,13 @@ return (d > 0 ? d + 'd ' : '') + p2(h) + ':' + p2(m) + ':' + p2(s);
 }
 
 var cycleInput = $('#cycleConfig'), cycleRows = $('#cycleRows');
-var cycleNames = {0:'Mario',1:'Standard',2:'Large',3:'Space Invaders',5:'Arkanoid',6:'Pac-Man',7:'Snake',8:'Tetris',10:'Asteroids',11:'Dino Runner',12:'Matrix Rain',14:'Weather',15:'Bomberman',16:'TRON',17:'Doom Fire'};
+var cycleNames = {0:'Mario',1:'Standard',2:'Large',3:'Space Invaders',5:'Arkanoid',6:'Pac-Man',7:'Snake',8:'Tetris',10:'Asteroids',11:'Dino Runner',12:'Matrix Rain',14:'Weather',15:'Bomberman',16:'TRON',17:'Doom Fire',18:'Stock Ticker'};
 var cycleItems = [];
 function initCycle() {
  cycleItems = cycleInput.value.split(',').map(function(v) { var p=v.split(':'); return {id:Number(p[0]),seconds:Number(p[1]),enabled:Number(p[1])>0}; });
- if (!cycleItems.some(function(v){return v.id===15;})) cycleItems.push({id:15,seconds:300,enabled:false});
- if (!cycleItems.some(function(v){return v.id===16;})) cycleItems.push({id:16,seconds:300,enabled:false});
- if (!cycleItems.some(function(v){return v.id===17;})) cycleItems.push({id:17,seconds:300,enabled:false});
+ // Faces added after this rotation was saved: append them, disabled.
+ Object.keys(cycleNames).forEach(function(k){ var id=Number(k);
+  if (!cycleItems.some(function(v){return v.id===id;})) cycleItems.push({id:id,seconds:300,enabled:false}); });
  drawCycle();
 }
 function saveCycle() { cycleInput.value=cycleItems.map(function(v){return v.id+':'+(v.enabled?v.seconds:0);}).join(','); cycleInput.dispatchEvent(new Event('change',{bubbles:true})); }
